@@ -20,9 +20,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	basePaths := []string{
-		filepath.Join(home, ".dotfiles/.bashrc.d"),
-		filepath.Join(home, ".dotfiles_test/.bashrc.d"),
+
+	basePaths, err := dotfileDirs(home)
+	if err != nil {
+		log.Fatalln("Error getting dotfile directories:", err)
 	}
 
 	// Discover dotfiles
@@ -52,4 +53,21 @@ func main() {
 	for _, dotfile := range dotfiles {
 		fmt.Println(dotfile)
 	}
+}
+
+func dotfileDirs(dir string) ([]string, error) {
+	var basePaths []string
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			matched, _ := filepath.Match(".dotfiles*", entry.Name())
+			if matched {
+				basePaths = append(basePaths, filepath.Join(dir, entry.Name(), ".bashrc.d"))
+			}
+		}
+	}
+	return basePaths, nil
 }
