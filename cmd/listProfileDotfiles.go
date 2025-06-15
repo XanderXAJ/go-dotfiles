@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -42,8 +39,7 @@ func init() {
 func listDotfiles() {
 	// TODO Get environment configuration
 
-	// TODO Get shell
-	shell := "bash"
+	shell := detectShell()
 
 	// TODO Get dotfiles basePath/matcher
 	home, err := os.UserHomeDir()
@@ -82,6 +78,17 @@ func listDotfiles() {
 	for _, dotfile := range dotfiles {
 		fmt.Println(dotfile)
 	}
+}
+
+func detectShell() string {
+	shell := "bash"
+	if shellEnv := os.Getenv("SHELL"); shellEnv != "" {
+		shell = filepath.Base(shellEnv)
+	}
+	if len(shell) > 0 && shell[0] == '.' {
+		shell = shell[1:]
+	}
+	return shell
 }
 
 func dotfileDirs(dir string) ([]string, error) {
