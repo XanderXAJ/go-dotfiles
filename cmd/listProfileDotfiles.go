@@ -11,6 +11,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type listProfileDotfilesConfig struct {
+	shell string
+}
+
+var cliConfig listProfileDotfilesConfig
+
 // listProfileDotfilesCmd represents the listProfileDotfiles command
 var listProfileDotfilesCmd = &cobra.Command{
 	Use:   "listProfileDotfiles",
@@ -24,22 +30,18 @@ e.g. 00_system, 10_git, 99_zoxide etc.`,
 
 func init() {
 	rootCmd.AddCommand(listProfileDotfilesCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listProfileDotfilesCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listProfileDotfilesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	listProfileDotfilesCmd.Flags().StringVar(&cliConfig.shell, "shell", "", "Specify shell (e.g. bash, zsh, fish)")
 }
 
 func listDotfiles() {
 	// TODO Get environment configuration
 
-	shell := detectShell()
+	var shell string
+	if cliConfig.shell != "" {
+		shell = cliConfig.shell
+	} else {
+		shell = detectShell()
+	}
 
 	// TODO Get dotfiles basePath/matcher
 	home, err := os.UserHomeDir()
