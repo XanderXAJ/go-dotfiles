@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/spf13/cobra"
+	"github.com/xanderxaj/go-dotfiles/internal/discovery"
 )
 
 type listProfileDotfilesConfig struct {
@@ -49,7 +50,7 @@ func listDotfiles() {
 		log.Fatalln(err)
 	}
 
-	basePaths, err := dotfileDirs(home)
+	basePaths, err := discovery.DotfileDirs(home)
 	if err != nil {
 		log.Fatalln("Error getting dotfile directories:", err)
 	}
@@ -57,6 +58,7 @@ func listDotfiles() {
 	// Discover dotfiles
 	dotfiles := make([]string, 0, 50)
 	for _, basePath := range basePaths {
+		basePath = filepath.Join(basePath, ".bashrc.d")
 		filepath.WalkDir(basePath, func(walkPath string, d fs.DirEntry, err error) error {
 			if walkPath == basePath {
 				return nil
@@ -91,21 +93,4 @@ func detectShell() string {
 		shell = shell[1:]
 	}
 	return shell
-}
-
-func dotfileDirs(dir string) ([]string, error) {
-	var basePaths []string
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-	for _, entry := range entries {
-		if entry.IsDir() {
-			matched, _ := filepath.Match(".dotfiles*", entry.Name())
-			if matched {
-				basePaths = append(basePaths, filepath.Join(dir, entry.Name(), ".bashrc.d"))
-			}
-		}
-	}
-	return basePaths, nil
 }
